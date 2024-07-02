@@ -5,22 +5,20 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Trust the first proxy (e.g., Heroku, Vercel, etc.)
 app.set('trust proxy', 1);
 
-// Endpoint handler
 app.get('/api/hello', async (req, res) => {
     const visitorName = req.query.visitor_name || 'Anonymous';
     const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     let location = 'New York';
-    let latitude = 40.7128; // Default latitude for New York
-    let longitude = -74.0060; // Default longitude for New York
+    let latitude = 40.7128; 
+    let longitude = -74.0060; 
 
     try {
-        // Attempt to get location data from IP
+        
         const geoResponse = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IPGEO_API_KEY}&ip=${clientIP}`);
-        console.log('Geo API Response:', geoResponse.data); // Log geo API response for debugging
+        console.log('Geo API Response:', geoResponse.data); 
 
         location = geoResponse.data.city || location;
         latitude = geoResponse.data.latitude || latitude;
@@ -29,10 +27,10 @@ app.get('/api/hello', async (req, res) => {
         console.error('Error fetching location data:', error.message);
     }
 
-    // Default temperature value
+    
     let temperature = 11;
 
-    // Get weather data from OpenWeatherMap
+    
     try {
         const weatherResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.OPENWEATHER_API_KEY}`);
         console.log('Weather API Response:', weatherResponse.data); // Log weather API response for debugging
@@ -42,14 +40,14 @@ app.get('/api/hello', async (req, res) => {
         console.error('Error fetching weather data:', error.message);
     }
 
-    // Prepare response object
+    
     const response = {
         client_ip: clientIP,
         location: location,
         greeting: `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${location}`
     };
 
-    // Send JSON response
+    
     res.json(response);
 });
 
