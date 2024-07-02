@@ -5,13 +5,13 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Trusting proxy headers
-app.set('trust proxy', true);
+// Trust the first proxy (e.g., Heroku, Vercel, etc.)
+app.set('trust proxy', 1);
 
 // Endpoint handler
 app.get('/api/hello', async (req, res) => {
     const visitorName = req.query.visitor_name || 'Anonymous';
-    const clientIP = req.ip;
+    const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     let location = 'New York';
     let latitude = 40.7128; // Default latitude for New York
@@ -32,8 +32,8 @@ app.get('/api/hello', async (req, res) => {
     // Default temperature value
     let temperature = 11;
 
+    // Get weather data from OpenWeatherMap
     try {
-        // Get weather data from OpenWeatherMap
         const weatherResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.OPENWEATHER_API_KEY}`);
         console.log('Weather API Response:', weatherResponse.data); // Log weather API response for debugging
 
